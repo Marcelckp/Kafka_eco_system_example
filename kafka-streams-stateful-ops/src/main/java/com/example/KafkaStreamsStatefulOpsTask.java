@@ -36,7 +36,15 @@ public class KafkaStreamsStatefulOpsTask {
     StreamsBuilder builder = new StreamsBuilder();
     KStream<String, String> source = builder.stream("input-topic");
 
-    //enter solution here
+    // This will take the key and count how many times the key has been received in the stream and parse the key to a hash table to keep track
+    // Of the amount of times that specific key has come through the data pipeline
+    source.groupByKey()
+      // Counts the number of records for each key. Each key will be linked to a count
+      .count()
+      // This converts the table into  a stream that will contain records where the key is the original key and the value passed is the time the value has appeared
+      .toStream()
+      // This outputs that value to the output-topic so that we can view our data in its end state
+      .to("output-topic", Produced.with(Serdes.String(), Serdes.Long()));
 
     KafkaStreams app = new KafkaStreams(builder.build(), configurations);
 

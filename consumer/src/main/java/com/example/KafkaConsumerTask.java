@@ -40,8 +40,6 @@ public class KafkaConsumerTask {
             isRunning = false;  // Set the flag to false when shutting down
         }));
 
-        //enter solution here
-
         try {
             while (isRunning) {
                 // Kafka consumers typically poll for messages from the Kafka broker. 

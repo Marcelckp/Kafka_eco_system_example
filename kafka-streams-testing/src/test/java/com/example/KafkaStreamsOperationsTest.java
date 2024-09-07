@@ -41,11 +41,36 @@ public class KafkaStreamsOperationsTest {
 
     @Test()
     public void testFilterTopologyPass() {
-        //enter solution here
+        topology = KafkaStreamsOperations.filterTopology();
+        td = new TopologyTestDriver(topology, config);
+
+        inputTopic = td.createInputTopic(KafkaStreamsOperations.INPUT_TOPIC, Serdes.String().serializer(), Serdes.String().serializer());
+        outputTopic = td.createOutputTopic(KafkaStreamsOperations.OUTPUT_TOPIC, Serdes.String().deserializer(), Serdes.String().deserializer());
+
+        assertThat(outputTopic.isEmpty(), is(true));
+
+        inputTopic.pipeInput("user1", "new york");
+        // When we read the value we consume it and move the consumers offset and will leave the output topic as empty
+        assertThat(outputTopic.readValue(), equalTo("new york"));
+        assertThat(outputTopic.isEmpty(), is(true));
+
+        inputTopic.pipeInput("user2", "texas");
+        assertThat(outputTopic.isEmpty(), is(true));
     }
 
     @Test
     public void testFilterTopologyFail() {
-        //enter solution here
+        topology = KafkaStreamsOperations.filterTopology();
+        td = new TopologyTestDriver(topology, config);
+
+        inputTopic = td.createInputTopic(KafkaStreamsOperations.INPUT_TOPIC, Serdes.String().serializer(), Serdes.String().serializer());
+        outputTopic = td.createOutputTopic(KafkaStreamsOperations.OUTPUT_TOPIC, Serdes.String().deserializer(), Serdes.String().deserializer());
+
+        assertThat(outputTopic.isEmpty(), is(true));
+
+        inputTopic.pipeInput("KeyLongerThan5", "texastexasToLong");
+        // We check that our message made it to the output task as the key and value are larger than 5. We check that our topic is not empty then we consume it and check the value
+        assertThat(outputTopic.isEmpty(), is(false));
+        assertThat(outputTopic.readValue(), equalTo("texastexasToLong"));
     }
 }
