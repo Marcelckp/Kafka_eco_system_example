@@ -1,0 +1,9 @@
+{
+ "namespace": "com.example",
+ "type": "record",
+ "name": "Movie",
+ "fields": [
+     {"name": "name", "type": "string"},
+     {"name": "lead_actor", "type": "string"}
+ ]
+}
