@@ -33,6 +33,7 @@ public class KafkaConsumerTask {
 
 
         KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
+        consumer.subscribe(Collections.singletonList(topicName));
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("Stopping Kafka Consumer");
@@ -40,6 +41,25 @@ public class KafkaConsumerTask {
         }));
 
         //enter solution here
+
+        try {
+            while (isRunning) {
+                // Kafka consumers typically poll for messages from the Kafka broker. 
+                // This means that the consumer requests batches of messages from the broker at regular intervals. 
+                // The size of these batches can be configured, allowing consumers to pull messages one by one or in bulk.
+                // For now every time we poll we will fetch all the records that were produced since the last time we polled for records.
+                // The consumer will keep track of the message offset to prevent fetching records that have been shown/fetched already.
+                ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
+
+                // Loop over the returned array of records to print out the information
+                for (ConsumerRecord<String, String> record : records) {
+                    System.out.printf("topic=%s, partition=%d, offset=%d, key=%s, value=%s\n",
+                            record.topic(), record.partition(), record.offset(), record.key(), record.value());
+                }
+            }
+        } finally {
+            consumer.close();
+        }
     }
 
 }

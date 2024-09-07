@@ -45,6 +45,33 @@ public class KafkaConsumerAsyncCommitTask {
         System.out.println("Started Kafka Consumer for Topic: "+ topicName + ", Consumer Group: " + groupName);
 
 
-        //enter solution here
+        props.setProperty(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
+
+        try {
+            while (isRunning) {
+                ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
+                for (ConsumerRecord<String, String> record : records) {
+                    System.out.printf("Got message from topic=%s, partition=%d, offset=%d, key=%s, value=%s\n",
+                            record.topic(), record.partition(), record.offset(), record.key(), record.value());
+                    
+                    consumer.commitAsync(new OffsetCommitCallback() {
+                        @Override
+                        public void onComplete(Map<TopicPartition, OffsetAndMetadata> offsets, Exception exception) {
+                            if (exception != null) {
+                                System.out.println("Exception while committing offsets - "+ offsets);
+                            } else {
+                                for (Map.Entry<TopicPartition, OffsetAndMetadata> entry : offsets.entrySet()) {
+
+                                    System.out.printf("Commit details: topic=%s, partition=%d, offset=%d\n",
+                                    entry.getKey().topic(), entry.getKey().partition(), entry.getValue().offset());
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+        } finally {
+            consumer.close();
+        }
     }
 }

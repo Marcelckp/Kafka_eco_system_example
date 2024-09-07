@@ -33,6 +33,25 @@ public class KafkaAsyncProducerTask {
     CountDownLatch counter = new CountDownLatch(5);
 
     //enter the solution
+    for (int i = 0; i < 5; i++) {
+      String value = "async-loop-message-" + i;
+      String key = "async-kafka-msg-" + i;
+      ProducerRecord<String, String> record = new ProducerRecord<>(topicName, key, value);
+    
+      producer.send(record, new Callback() {
+        @Override
+        public void onCompletion(RecordMetadata metadata, Exception e) {
+          if (e != null) {
+            System.out.println("Error sending data " + key + e.getMessage());
+          } else {
+            System.out.println("Produced data: " + key);
+          }
+          counter.countDown();
+        }
+      });
+
+      Thread.sleep(1000);
+    }
 
     counter.await();
 

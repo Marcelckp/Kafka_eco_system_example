@@ -33,6 +33,19 @@ public class KafkaProducerTask {
     Producer<String, String> producer = new KafkaProducer<>(properties);
 
     //enter the solution here
+    for (int i = 0; i < 10; i++) {
+      String value = "loop-message-" + i;
+      String key = "kafka-msg-" + i 
+      ProducerRecord<String, String> record = new ProducerRecord<>(topicName, key, value);
+
+      Future<RecordMetadata> response = producer.send(record);
+      
+      response.get();
+
+      System.out.println("Produced data: " + key + "=" + value)
+
+      Thread.sleep(1000);
+    }
 
     producer.flush();
     producer.close();
