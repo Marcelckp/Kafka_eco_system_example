@@ -13,6 +13,28 @@ import java.util.HashMap;
 
 @Configuration
 public class KafkaProducerConfig {
-    
-  //enter solution here
+
+  @Bean
+  public ProducerFactory<String, String> producerFactory() {
+      Map<String, Object> configProps = new HashMap<>();
+
+      // Setting up global producer config options for all producers in the spring application
+      configProps.put(
+        ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, 
+        "localhost:9092");
+      configProps.put(
+        ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, 
+        StringSerializer.class);
+      configProps.put(
+        ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, 
+        StringSerializer.class);
+
+      // Return a factory kafka producer that will generate kafka producers with the necessary configurations
+      return new DefaultKafkaProducerFactory<>(configProps);
+  }
+
+  @Bean
+  public KafkaTemplate<String, String> kafkaTemplate() {
+      return new KafkaTemplate<>(producerFactory());
+  }
 }

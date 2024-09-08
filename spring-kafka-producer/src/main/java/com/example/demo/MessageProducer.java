@@ -12,5 +12,7 @@ public class MessageProducer {
     @Autowired
     private KafkaTemplate<String, String> kafkaTemplate;
     
-    //enter solution here
+    public void sendMessage(String msg) {
+        this.kafkaTemplate.send(TOPIC, msg);
+    }
 }

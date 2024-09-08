@@ -13,8 +13,12 @@ public class SpringKafkaConsumerApplication {
     public static void main(String[] args) {
         SpringApplication.run(SpringKafkaConsumerApplication.class, args);
     }
-
-    //enter solution here
     
+    // We can create a kafka consumer that listens with this decorator and supplying the decorator arguments for subscribing and listening to the correct topic.
+    @KafkaListener(id = "demo.group", topics = "spring-kafka-demo-topic")
+    public void listener(String msg) {
+        // We have the abilities to mutate the message as we please.
+        System.out.println(msg.toUpperCase());
+    }
 }
 
