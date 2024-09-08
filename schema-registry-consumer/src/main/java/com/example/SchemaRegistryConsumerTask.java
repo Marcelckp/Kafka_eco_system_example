@@ -33,14 +33,30 @@ public class SchemaRegistryConsumerTask {
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, KafkaAvroDeserializer.class);
         props.put(KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG, true);
         props.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        props.put(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, "http://localhost:8081");
 
-
+        // This is a clean up function - A shut down hook is a hook that will be run when the JVM has been shut down.
+        // We use this to stop the kafka consumer poll from running when the application has been shut down.
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("Stopping Kafka Consumer");
             isRunning = false;  // Set the flag to false when shutting down
         }));
         
-        //enter solution here
+        props.put(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, "http://localhost:8081");
+
+        try (final KafkaConsumer<String, Movie> consumer = new KafkaConsumer<>(props)) {
+            consumer.subscribe(Collections.singletonList(TOPIC));
+            System.out.println("avro based consumer application started.....");
+
+            while (isRunning) {
+                final ConsumerRecords<String, Movie> records = consumer.poll(Duration.ofMillis(100));
+                for (final ConsumerRecord<String, Movie> record : records) {
+                    final String movieName = record.key();
+                    final Movie movie = record.value();
+                    System.out.printf("lead actor in %s is %s%n", movieName, movie.getLeadActor());
+                }
+            }
+        }
 
     }
 
